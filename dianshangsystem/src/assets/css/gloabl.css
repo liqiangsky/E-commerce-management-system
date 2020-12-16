@@ -8,6 +8,9 @@ html, body, #app {
     background-color: #fff;
 }
 
+.text-center{
+    text-align: center;
+}
 /* padding-left */
 
 .p-l-10 {
