@@ -70,7 +70,6 @@ export default {
   async created() {
     this.loading = true;
     const res = await this.$http.get("menus");
-    console.log(res);
     if (res.meta.status == 200) {
       this.menus = res.data;
       this.loading = false;
