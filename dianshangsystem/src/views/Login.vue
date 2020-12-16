@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="login">
     <div class="login-background">
       <div class="loginForm p-l-20 p-r-20">
         <div class="img">
@@ -45,8 +45,8 @@ export default {
       const res = await this.$http.post("login", this.loginForm);
       console.log(res);
       if (res.meta.status == 200) {
-        sessionStorage.token = JSON.stringify(res.data.token);
-        this.$router.push({ path: "welcome" });
+        sessionStorage.token = res.data.token;
+        this.$router.push({ path: "home" });
       }
       this.$message({
         message:
