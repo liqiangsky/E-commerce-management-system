@@ -23,7 +23,7 @@
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="m-l-10" @click="Add"
+          <el-button type="primary" class="m-l-10" @click="Operation('Add')"
             >添加用户</el-button
           >
         </el-form-item>
@@ -45,7 +45,7 @@
         <el-table-column label="操作" width="210">
           <template slot-scope="scope">
             <el-button
-              @click="Edit(scope.row)"
+              @click="Operation('Edit', scope.row)"
               type="primary"
               icon="el-icon-edit"
             ></el-button>
@@ -55,7 +55,7 @@
               icon="el-icon-delete"
             ></el-button>
             <el-button
-              @click="Edit(scope.row)"
+              @click="Operation('Setting', scope.row)"
               type="warning"
               icon="el-icon-s-tools"
             ></el-button>
@@ -75,7 +75,7 @@
       </el-pagination>
     </el-card>
     <el-dialog
-      :title="title ? '添加用户' : '修改用户'"
+      :title="title"
       :visible.sync="dialogVisible"
       width="50%"
       :destroy-on-close="true"
@@ -85,14 +85,15 @@
         :rules="rules"
         :model="UserForm"
         label-width="80px"
+        v-show="title === '添加用户' || title === '修改用户'"
       >
-        <el-form-item label="用户名" prop="username" v-if="title"
+        <el-form-item label="用户名" prop="username" v-if="title === '添加用户'"
           ><el-input v-model="UserForm.username"></el-input
         ></el-form-item>
-        <el-form-item label="密码" prop="password" v-if="title"
+        <el-form-item label="密码" prop="password" v-if="title === '添加用户'"
           ><el-input v-model="UserForm.password"></el-input
         ></el-form-item>
-        <el-form-item label="用户名" v-if="!title"
+        <el-form-item label="用户名" v-if="title === '修改用户'"
           ><el-input disabled v-model="UserForm.username"></el-input
         ></el-form-item>
         <el-form-item label="邮箱" prop="email"
@@ -102,9 +103,29 @@
           ><el-input v-model="UserForm.mobile"></el-input
         ></el-form-item>
       </el-form>
+      <el-form
+        ref="RoleForm"
+        :model="RoleForm"
+        label-width="100px"
+        v-show="title === '分配角色'"
+        :rules="rules"
+      >
+        <el-form-item label="当前用户：">{{ RoleForm.username }}</el-form-item>
+        <el-form-item label="当前角色：">{{ RoleForm.oldrole }}</el-form-item>
+        <el-form-item label="分配新角色" prop="newrole">
+          <el-select v-model="RoleForm.newrole">
+            <el-option
+              v-for="role in RoleForm.roles"
+              :key="role.id + role.roleName"
+              :label="role.roleName"
+              :value="role.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="SubmitForm('UserForm')"
+        <el-button type="primary" @click="SubmitForm(FormName)"
           >确 定</el-button
         >
       </span>
@@ -126,14 +147,23 @@ export default {
       //总数
       total: 0,
       dialogVisible: false,
-      //用户编辑
+      //用户表单数据
       UserForm: {
         id: "",
         username: "",
         email: "",
         mobile: "",
       },
-      title: false,
+      RoleForm: {
+        id: "",
+        rid: "",
+        username: "",
+        oldrole: "",
+        newrole: "",
+        roles: [],
+      },
+      title: "",
+      FormName: "",
       type: "success",
       message: "获取用户数据成功！",
       rules: {
@@ -143,6 +173,9 @@ export default {
         password: [{ required: true, message: "请输入密码", trigger: "blur" }],
         email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
         mobile: [{ required: true, message: "请输入手机号", trigger: "blur" }],
+        newrole: [
+          { required: true, message: "请选择角色类型", trigger: "blur" },
+        ],
       },
     };
   },
@@ -177,19 +210,46 @@ export default {
       this.message = "获取用户数据成功！";
       this.Users();
     },
-    Add() {
-      this.title = true;
+    async Operation(type, row) {
       this.dialogVisible = true;
-    },
-    Edit(row) {
-      this.title = false;
-      this.dialogVisible = true;
-      this.UserForm = {
-        id: row.id,
-        username: row.username,
-        email: row.email,
-        mobile: row.mobile,
-      };
+      console.log(row);
+      switch (type) {
+        case "Add":
+          this.title = "添加用户";
+          this.FormName = "UserForm";
+          break;
+        case "Edit":
+          this.title = "修改用户";
+          this.FormName = "UserForm";
+          this.UserForm = {
+            id: row.id,
+            username: row.username,
+            email: row.email,
+            mobile: row.mobile,
+          };
+          break;
+        case "Setting":
+          this.title = "分配角色";
+          this.FormName = "RoleForm";
+          this.RoleForm.username = row.username;
+          this.RoleForm.oldrole = row.role_name;
+          this.RoleForm.id = row.id;
+          const res = await this.$http.get("roles");
+          if (res.meta.status == 200) {
+            this.type = "success";
+            this.message = "获取用户角色成功！";
+            this.RoleForm.roles = res.data;
+            console.log(res);
+          } else {
+            this.type = "error";
+            this.message = "error";
+          }
+          this.$message({
+            type: this.type,
+            message: this.message,
+          });
+          break;
+      }
     },
     Delete(row) {
       this.$confirm("此操作将永久删除该用户信息, 是否继续?", "提示", {
@@ -220,7 +280,7 @@ export default {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           switch (this.title) {
-            case false:
+            case "修改用户":
               var res = await this.$http.put(`users/${this.UserForm.id}`, {
                 email: this.UserForm.email,
                 mobile: this.UserForm.mobile,
@@ -230,9 +290,12 @@ export default {
                 this.message = "修改用户信息成功！";
                 this.Users();
                 this.dialogVisible = false;
+              } else {
+                this.type = "error";
+                this.message = "error";
               }
               break;
-            case true:
+            case "添加用户":
               var res = await this.$http.post("users", {
                 username: this.UserForm.username,
                 password: this.UserForm.password,
@@ -247,9 +310,22 @@ export default {
               } else {
                 this.type = "error";
                 this.message = "用户已存在！";
-                this.Users();
               }
               break;
+            case "分配角色":
+              var res = await this.$http.put(`users/${this.RoleForm.id}/role`, {
+                id: this.RoleForm.id,
+                rid: this.RoleForm.newrole,
+              });
+              if (res.meta.status == 200) {
+                this.type = "success";
+                this.message = "更新用户角色成功！";
+                this.Users();
+                this.dialogVisible = false;
+              } else {
+                this.type = "error";
+                this.message = "error";
+              }
           }
         } else {
           console.log("error submit!!");
@@ -266,14 +342,14 @@ export default {
       }
     },
     handleSizeChange(val) {
-      this.type = "success";
-      this.message = "获取用户数据成功！";
+      // this.type = "success";
+      // this.message = "获取用户数据成功！";
       this.queryinfo.pagesize = val;
       this.Users();
     },
     handleCurrentChange(val) {
-      this.type = "success";
-      this.message = "获取用户数据成功！";
+      // this.type = "success";
+      // this.message = "获取用户数据成功！";
       this.queryinfo.pagenum = val;
       this.Users();
     },
