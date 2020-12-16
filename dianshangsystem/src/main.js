@@ -21,9 +21,11 @@ axios.interceptors.response.use((response) => {
 }, (reject) => {
   console.log(reject)
 })
-// axios.interceptors.request.use(config => {
-//   return config;
-// })
+//请求拦截
+axios.interceptors.request.use(config => {
+  config.headers.Authorization = sessionStorage.token;
+  return config;
+})
 
 new Vue({
   router,
