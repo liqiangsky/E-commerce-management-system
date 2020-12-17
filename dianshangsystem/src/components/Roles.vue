@@ -7,7 +7,13 @@
     </el-breadcrumb>
     <el-card class="m-t-20">
       <el-button type="primary" @click="Operation('Add')">添加角色</el-button>
-      <el-table :data="tableData" border style="width: 100%" class="m-t-20">
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        border
+        style="width: 100%"
+        class="m-t-20"
+      >
         <el-table-column width="50" type="expand">
           <template slot-scope="scope">
             <el-row
@@ -140,6 +146,7 @@
 export default {
   data() {
     return {
+      loading: false,
       tableData: [],
       data: [],
       dialogVisible: false,
@@ -169,6 +176,7 @@ export default {
   },
   methods: {
     async Roles() {
+      this.loading = true;
       const res = await this.$http.get("roles");
       if (res.meta.status == 200) {
         this.$message({
@@ -176,6 +184,7 @@ export default {
           message: this.message,
         });
         this.tableData = res.data;
+        this.loading = false;
       }
     },
     async Operation(type, row) {
