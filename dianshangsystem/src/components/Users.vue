@@ -28,7 +28,12 @@
           >
         </el-form-item>
       </el-form>
-      <el-table :data="tableData" border style="width: 100%">
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        border
+        style="width: 100%"
+      >
         <el-table-column label="#" width="50" type="index"></el-table-column>
         <el-table-column label="姓名" prop="username"> </el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
@@ -136,6 +141,7 @@
 export default {
   data() {
     return {
+      loading: false,
       //用户列表
       queryinfo: {
         //关键字
@@ -186,6 +192,7 @@ export default {
   },
   methods: {
     async Users() {
+      this.loading = true;
       const res = await this.$http.get("users", {
         params: this.queryinfo,
       });
@@ -196,6 +203,7 @@ export default {
         });
         this.tableData = res.data.users;
         this.total = res.data.total;
+        this.loading = false;
       }
     },
     Search() {
@@ -342,14 +350,10 @@ export default {
       }
     },
     handleSizeChange(val) {
-      // this.type = "success";
-      // this.message = "获取用户数据成功！";
       this.queryinfo.pagesize = val;
       this.Users();
     },
     handleCurrentChange(val) {
-      // this.type = "success";
-      // this.message = "获取用户数据成功！";
       this.queryinfo.pagenum = val;
       this.Users();
     },
