@@ -21,7 +21,7 @@
                 <el-tag
                   type="danger"
                   closable
-                  @close="CloseTag(scope.row, i)"
+                  @close="CloseTag(scope.row, i, scope.row.children)"
                   class="m-10"
                   >{{ i.authName }}</el-tag
                 >
@@ -38,7 +38,7 @@
                     <el-tag
                       type="success"
                       closable
-                      @close="CloseTag(scope.row, j)"
+                      @close="CloseTag(scope.row, j, i.children)"
                       class="m-10"
                       >{{ j.authName }}</el-tag
                     >
@@ -49,7 +49,7 @@
                     <el-tag
                       type="warning"
                       closable
-                      @close="CloseTag(scope.row, k)"
+                      @close="CloseTag(scope.row, k, j.children)"
                       class="m-10"
                       v-for="k in j.children"
                       :key="k.id + k.authName"
@@ -209,9 +209,10 @@ export default {
       }
       node.children.forEach((item) => this.GetCheckList(item, arr));
     },
-    CloseTag(row, right) {
-      console.log(row.id);
-      console.log(right.id);
+    CloseTag(row, right, arr) {
+      console.log(row);
+      console.log(right);
+      console.log(arr, "arr");
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -221,11 +222,8 @@ export default {
           const res = await this.$http.delete(
             `roles/${row.id}/rights/${right.id}`
           );
-          console.log(res);
           if (res.meta.status == 200) {
-            // this.type = "success";
-            // this.message = "取消分配权限成功！";
-            // this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+            arr.splice(arr.indexOf(right), 1);
             this.$message({
               type: "success",
               message: "取消分配权限成功！",
@@ -322,9 +320,6 @@ export default {
           });
         });
     },
-    // CloseDialog() {
-    //   this.GetCheck = [];
-    // },
   },
 };
 </script>
