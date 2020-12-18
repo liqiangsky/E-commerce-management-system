@@ -23,7 +23,7 @@
             :collapse-transition="false"
             :default-active="href"
           >
-            <el-submenu v-for="item in menus" :key="item.id" :index="item.path">
+            <el-submenu v-for="item in menus" :key="item.id" :index="'/'+item.path">
               <template slot="title">
                 <i :class="'el-icon-s-' + icon[item.id]"></i>
                 <span class="m-r-50">{{ item.authName }}</span>
@@ -31,7 +31,7 @@
               <el-menu-item
                 v-for="i in item.children"
                 :key="i.id"
-                :index="i.path"
+                :index="'/'+i.path"
               >
                 <template>
                   <i class="el-icon-s-operation"></i>
@@ -70,6 +70,7 @@ export default {
   async created() {
     this.loading = true;
     const res = await this.$http.get("menus");
+    console.log(res.data)
     if (res.meta.status == 200) {
       this.menus = res.data;
       this.loading = false;
