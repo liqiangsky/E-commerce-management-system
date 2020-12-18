@@ -5,6 +5,9 @@ import Home from '../views/Home'
 import Welcome from '../components/Welcome'
 import Users from '../components/Users'
 import Roles from '../components/Roles'
+import Rights from '../components/Rights'
+import Goods from '../components/Goods'
+import Goods_add from '../components/Goods_add'
 
 //防止重复点击路由出错问题
 const originalPush = VueRouter.prototype.push
@@ -22,7 +25,10 @@ const routes = [
     children: [
       { path: '/welcome', name: Welcome, component: () => import('@/components/Welcome.vue') },
       { path: '/users', name: Users, component: () => import('@/components/Users.vue') },
-      { path: '/roles', name: Roles, component: () => import('@/components/Roles.vue') }
+      { path: '/roles', name: Roles, component: () => import('@/components/Roles.vue') },
+      { path: '/rights', name: Rights, component: () => import('@/components/Rights.vue') },
+      { path: '/goods', name: Goods, component: () => import('@/components/Goods.vue') },
+      { path: '/goods/:add', name: Goods_add, component: () => import('@/components/Goods_add.vue') }
     ]
   },
   // {
