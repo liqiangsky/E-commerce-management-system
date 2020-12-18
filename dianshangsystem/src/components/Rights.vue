@@ -41,23 +41,27 @@ export default {
       loading: false,
     };
   },
-  async created() {
-    this.loading = true;
-    const res = await this.$http.get("rights/list");
-    if (res.meta.status == 200) {
-      this.tableData = res.data;
-      this.$message({
-        type: "success",
-        message: "获取权限列表成功！",
-      });
-      this.loading = false;
-    } else {
-      this.$message({
-        type: "error",
-        message: "error",
-      });
-    }
+  created() {
+    this.Rights();
   },
-  methods: {},
+  methods: {
+    async Rights() {
+      this.loading = true;
+      const res = await this.$http.get("rights/list");
+      if (res.meta.status == 200) {
+        this.tableData = res.data;
+        this.$message({
+          type: "success",
+          message: "获取权限列表成功！",
+        });
+        this.loading = false;
+      } else {
+        this.$message({
+          type: "error",
+          message: "error",
+        });
+      }
+    },
+  },
 };
 </script>
