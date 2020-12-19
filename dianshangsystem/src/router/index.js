@@ -8,6 +8,7 @@ import Roles from '../components/Roles'
 import Rights from '../components/Rights'
 import Goods from '../components/Goods'
 import Goods_add from '../components/Goods_add'
+import Params from '../components/Params'
 
 //防止重复点击路由出错问题
 const originalPush = VueRouter.prototype.push
@@ -28,7 +29,8 @@ const routes = [
       { path: '/roles', name: Roles, component: () => import('@/components/Roles.vue') },
       { path: '/rights', name: Rights, component: () => import('@/components/Rights.vue') },
       { path: '/goods', name: Goods, component: () => import('@/components/Goods.vue') },
-      { path: '/goods/:add', name: Goods_add, component: () => import('@/components/Goods_add.vue') }
+      { path: '/goods/:add', name: Goods_add, component: () => import('@/components/Goods_add.vue') },
+      { path: '/params', name: Params, component: () => import('@/components/Params.vue') }
     ]
   },
   // {
