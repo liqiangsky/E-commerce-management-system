@@ -28,6 +28,7 @@
             type="primary"
             size="mini"
             :disabled="Goods_cat.length !== 3"
+            @click="Add('many')"
             >添加参数</el-button
           >
           <el-table
@@ -37,7 +38,37 @@
             style="width: 100%"
             class="m-t-20"
           >
-            <el-table-column width="50" type="expand"> </el-table-column>
+            <el-table-column width="50" type="expand">
+              <template slot-scope="scope">
+                <el-tag
+                  class="m-10"
+                  v-for="(tag, index) in scope.row.attr_vals"
+                  :key="tag + index + Math.random()"
+                  closable
+                  :disable-transitions="true"
+                  @close="handleClose(scope.row, tag)"
+                >
+                  {{ tag }}
+                </el-tag>
+                <el-input
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <el-button
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scope.row)"
+                  >+ New Tag</el-button
+                >
+              </template>
+            </el-table-column>
             <el-table-column
               label="#"
               width="50"
@@ -70,6 +101,7 @@
             type="primary"
             size="mini"
             :disabled="Goods_cat.length !== 3"
+            @click="Add('only')"
             >添加参数</el-button
           >
           <el-table
@@ -79,7 +111,37 @@
             style="width: 100%"
             class="m-t-20"
           >
-            <el-table-column width="50" type="expand"> </el-table-column>
+            <el-table-column width="50" type="expand">
+              <template slot-scope="scope">
+                <el-tag
+                  class="m-10"
+                  v-for="(tag, index) in scope.row.attr_vals"
+                  :key="tag + index + Math.random()"
+                  closable
+                  :disable-transitions="true"
+                  @close="handleClose(scope.row, tag)"
+                >
+                  {{ tag }}
+                </el-tag>
+                <el-input
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <el-button
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scope.row)"
+                  >+ New Tag</el-button
+                >
+              </template>
+            </el-table-column>
             <el-table-column
               label="#"
               width="50"
@@ -108,7 +170,12 @@
           </el-table>
         </el-tab-pane>
       </el-tabs>
-      <el-dialog :title="title" :visible.sync="dialogVisible" width="50%">
+      <el-dialog
+        :title="title"
+        :visible.sync="dialogVisible"
+        width="50%"
+        :destroy-on-close="true"
+      >
         <el-form
           ref="ParameterForm"
           :model="ParameterForm"
@@ -164,12 +231,14 @@ export default {
           { required: true, message: "此选项不能为空！", trigger: "blur" },
         ],
       },
+      mode: "",
     };
   },
   created() {
     this.Goods();
   },
   methods: {
+    //所有商品分类
     async Goods() {
       const res = await this.$http.get("categories");
       if (res.meta.status == 200) {
@@ -185,14 +254,40 @@ export default {
         message: this.message,
       });
     },
-    async handleChange(value) {
+    //切换分类
+    handleChange(value) {
       this.Goods_cat = value;
+      this.attr_vals();
+    },
+    //切换静态动态参数类型
+    handleLeave(activeName, oldActiveName) {
+      switch (+activeName) {
+        case 0:
+          this.sel = "many";
+          break;
+        case 1:
+          this.sel = "only";
+          break;
+      }
+      if (this.Goods_cat.length === 3) {
+        this.attr_vals();
+      }
+    },
+    //参数列表
+    async attr_vals() {
       const res = await this.$http.get(`categories/${this.cateid}/attributes`, {
         params: {
           sel: this.sel,
         },
       });
+      console.log(res.data);
       if (res.meta.status == 200) {
+        res.data.forEach((item) => {
+          item.inputVisible = false;
+          item.inputValue = "";
+          item.attr_vals =
+            item.attr_vals !== "" ? item.attr_vals.split(" ") : [];
+        });
         this.tableData = res.data;
         this.type = "success";
         this.message = "获取参数列表成功！";
@@ -205,48 +300,36 @@ export default {
         message: this.message,
       });
     },
-    async handleLeave(activeName, oldActiveName) {
-      switch (+activeName) {
-        case 0:
-          this.sel = "many";
+    //新增
+    Add(sel) {
+      this.dialogVisible = true;
+      this.ParameterForm.attr_name = "";
+      this.mode = "post";
+      switch (sel) {
+        case "many":
+          this.title = "添加动态参数";
+          this.label = "动态参数";
           break;
-        case 1:
-          this.sel = "only";
+        case "only":
+          this.title = "添加静态属性";
+          this.label = "静态属性";
           break;
-      }
-      if (this.Goods_cat.length === 3) {
-        const res = await this.$http.get(
-          `categories/${this.cateid}/attributes`,
-          {
-            params: {
-              sel: this.sel,
-            },
-          }
-        );
-        if (res.meta.status == 200) {
-          this.tableData = res.data;
-          this.type = "success";
-          this.message = "获取参数列表成功！";
-        } else {
-          this.type = "error";
-          this.message = "获取参数列表失败！";
-        }
-        this.$message({
-          type: this.type,
-          message: this.message,
-        });
       }
     },
+    //编辑
     Edit(row, sel) {
       this.dialogVisible = true;
+      this.mode = "put";
       switch (sel) {
         case "many":
           this.title = "修改动态参数";
           this.label = "动态参数";
+          this.sel = sel;
           break;
         case "only":
           this.title = "修改静态属性";
           this.label = "静态属性";
+          this.sel = sel;
           break;
       }
       this.attr_id = row.attr_id;
@@ -254,24 +337,74 @@ export default {
       this.ParameterForm.attr_vals = row.attr_vals;
       this.ParameterForm.attr_name = row.attr_name;
     },
+    //提交
     SubmitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
-          const res = await this.$http.put(
-            `categories/${this.cateid}/attributes/${this.attr_id}`,
-            this.ParameterForm
-          );
-          if (res.meta.status == 200) {
-            this.type = "success";
-            this.message = "修改动态参数成功！";
-            const i = this.tableData.find((item) => {
-              return item.attr_id === res.data.attr_id;
-            });
-            i.attr_name = res.data.attr_name;
-            this.dialogVisible = false;
-          } else {
-            this.type = "error";
-            this.message = "修改动态参数失败！";
+          switch (this.mode) {
+            case "put":
+              const res = await this.$http.put(
+                `categories/${this.cateid}/attributes/${this.attr_id}`,
+                this.ParameterForm
+              );
+              if (res.meta.status == 200) {
+                this.type = "success";
+                switch (this.sel) {
+                  case "many":
+                    this.message = "修改动态参数成功！";
+                    break;
+                  case "only":
+                    this.message = "修改静态参数成功！";
+                    break;
+                }
+                const i = this.tableData.find((item) => {
+                  return item.attr_id === res.data.attr_id;
+                });
+                i.attr_name = res.data.attr_name;
+                this.dialogVisible = false;
+              } else {
+                this.type = "error";
+                switch (this.sel) {
+                  case "many":
+                    this.message = "修改动态参数失败！";
+                    break;
+                  case "only":
+                    this.message = "修改静态参数失败！";
+                    break;
+                }
+              }
+              break;
+            case "post":
+              const res1 = await this.$http.post(
+                `categories/${this.cateid}/attributes`,
+                {
+                  attr_name: this.ParameterForm.attr_name,
+                  attr_sel: this.sel,
+                }
+              );
+              if (res1.meta.status == 201) {
+                this.type = "success";
+                switch (this.sel) {
+                  case "many":
+                    this.message = "添加动态参数成功！";
+                    break;
+                  case "only":
+                    this.message = "添加静态参数成功！";
+                    break;
+                }
+                this.tableData.push(res1.data);
+                this.dialogVisible = false;
+              } else {
+                this.type = "error";
+                switch (this.sel) {
+                  case "many":
+                    this.message = "添加动态参数失败！";
+                    break;
+                  case "only":
+                    this.message = "添加静态参数失败！";
+                    break;
+                }
+              }
           }
         } else {
           this.type = "error";
@@ -283,6 +416,7 @@ export default {
         });
       });
     },
+    //参数删除
     Delete(row) {
       this.$confirm("此操作将永久删除该参/属性, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -313,7 +447,54 @@ export default {
           });
         });
     },
+    //tag关闭
+    handleClose(row, tag) {
+      row.attr_vals.splice(row.attr_vals.indexOf(tag), 1);
+      this.Vals(row);
+    },
+    //new tag input /自动获取焦点
+    showInput(row) {
+      console.log(row);
+      row.inputVisible = true;
+      this.$nextTick((_) => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    },
+    //更新参数vals
+    async Vals(row) {
+      const res = await this.$http.put(
+        `categories/${row.cat_id}/attributes/${row.attr_id}`,
+        {
+          attr_name: row.attr_name,
+          attr_sel: this.sel,
+          attr_vals: row.attr_vals.join(" "),
+        }
+      );
+      console.log(res);
+      if (res.meta.status == 200) {
+        this.type = "success";
+        this.message = "修改参数项成功！";
+      } else {
+        this.type = "success";
+        this.message = "修改参数项失败！";
+      }
+      this.$message({
+        type: this.type,
+        message: this.message,
+      });
+    },
+    //new tag 与 输入框切换
+    async handleInputConfirm(row) {
+      let inputValue = row.inputValue;
+      if (inputValue.trim().length !== 0) {
+        row.attr_vals.push(inputValue.trim());
+        this.Vals(row);
+      }
+      row.inputVisible = false;
+      row.inputValue = "";
+    },
   },
+  //计算属性分类id
   computed: {
     cateid() {
       if (this.Goods_cat.length === 3) {
@@ -323,3 +504,20 @@ export default {
   },
 };
 </script>
+<style lang="less">
+.el-tag + .el-tag {
+  margin-left: 10px;
+}
+.button-new-tag {
+  margin-left: 10px;
+  height: 32px;
+  line-height: 30px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.input-new-tag {
+  width: 150px !important;
+  margin-left: 10px;
+  vertical-align: bottom;
+}
+</style>
