@@ -9,6 +9,7 @@ import Rights from '../components/Rights'
 import Goods from '../components/Goods'
 import Goods_add from '../components/Goods_add'
 import Params from '../components/Params'
+import Categories from '../components/Categories'
 
 //防止重复点击路由出错问题
 const originalPush = VueRouter.prototype.push
@@ -24,13 +25,14 @@ const routes = [
   {
     path: '/home', redirect: '/welcome', name: Home, component: () => import('@/views/Home.vue'),
     children: [
-      { path: '/welcome', name: Welcome, component: () => import('@/components/Welcome.vue') },
-      { path: '/users', name: Users, component: () => import('@/components/Users.vue') },
-      { path: '/roles', name: Roles, component: () => import('@/components/Roles.vue') },
-      { path: '/rights', name: Rights, component: () => import('@/components/Rights.vue') },
-      { path: '/goods', name: Goods, component: () => import('@/components/Goods.vue') },
-      { path: '/goods/:add', name: Goods_add, component: () => import('@/components/Goods_add.vue') },
-      { path: '/params', name: Params, component: () => import('@/components/Params.vue') }
+      { path: '/welcome', name: 'Welcome', component: () => import('@/components/Welcome.vue') },
+      { path: '/users', name: 'Users', component: () => import('@/components/Users.vue') },
+      { path: '/roles', name: 'Roles', component: () => import('@/components/Roles.vue') },
+      { path: '/rights', name: 'Rights', component: () => import('@/components/Rights.vue') },
+      { path: '/goods', name: 'Goods', component: () => import('@/components/Goods.vue') },
+      { path: '/goods/:add', name: 'Goods_add', component: () => import('@/components/Goods_add.vue') },
+      { path: '/params', name: 'Params', component: () => import('@/components/Params.vue') },
+      { path: '/categories', name: 'Categories', component: () => import('@/components/Categories.vue') }
     ]
   },
   // {
