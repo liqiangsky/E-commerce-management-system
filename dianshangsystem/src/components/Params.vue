@@ -280,7 +280,6 @@ export default {
           sel: this.sel,
         },
       });
-      console.log(res.data);
       if (res.meta.status == 200) {
         res.data.forEach((item) => {
           item.inputVisible = false;
@@ -454,7 +453,6 @@ export default {
     },
     //new tag input /自动获取焦点
     showInput(row) {
-      console.log(row);
       row.inputVisible = true;
       this.$nextTick((_) => {
         this.$refs.saveTagInput.$refs.input.focus();
@@ -470,7 +468,6 @@ export default {
           attr_vals: row.attr_vals.join(" "),
         }
       );
-      console.log(res);
       if (res.meta.status == 200) {
         this.type = "success";
         this.message = "修改参数项成功！";
