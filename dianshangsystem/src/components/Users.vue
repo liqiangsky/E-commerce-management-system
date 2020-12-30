@@ -50,16 +50,19 @@
         <el-table-column label="操作" width="210">
           <template slot-scope="scope">
             <el-button
+              size="mini"
               @click="Operation('Edit', scope.row)"
               type="primary"
               icon="el-icon-edit"
             ></el-button>
             <el-button
+              size="mini"
               @click="Delete(scope.row)"
               type="danger"
               icon="el-icon-delete"
             ></el-button>
             <el-button
+              size="mini"
               @click="Operation('Setting', scope.row)"
               type="warning"
               icon="el-icon-s-tools"
@@ -170,8 +173,8 @@ export default {
       },
       title: "",
       FormName: "",
-      type: "success",
-      message: "获取用户数据成功！",
+      type: "",
+      message: "",
       rules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" },
@@ -191,20 +194,25 @@ export default {
     this.Users();
   },
   methods: {
-    async Users() {
+    async Users(type, message) {
       this.loading = true;
       const res = await this.$http.get("users", {
         params: this.queryinfo,
       });
       if (res.meta.status == 200) {
-        this.$message({
-          type: this.type,
-          message: this.message,
-        });
+        this.type = "success";
+        this.message = "获取用户数据成功！";
         this.tableData = res.data.users;
         this.total = res.data.total;
-        this.loading = false;
+      } else {
+        this.type = "error";
+        this.message = "获取用户数据失败！";
       }
+      this.loading = false;
+      this.$message({
+        type: this.type,
+        message: this.message,
+      });
     },
     Search() {
       this.queryinfo.pagenum = 1;
@@ -220,7 +228,6 @@ export default {
     },
     async Operation(type, row) {
       this.dialogVisible = true;
-      console.log(row);
       switch (type) {
         case "Add":
           this.title = "添加用户";
@@ -247,7 +254,6 @@ export default {
             this.type = "success";
             this.message = "获取用户角色成功！";
             this.RoleForm.roles = res.data;
-            console.log(res);
           } else {
             this.type = "error";
             this.message = "error";
@@ -336,9 +342,14 @@ export default {
               }
           }
         } else {
-          console.log("error submit!!");
+          this.type = "error";
+          this.message = "请先按要求填写信息！";
           return false;
         }
+        this.$message({
+          type: this.type,
+          message: this.message,
+        });
       });
     },
     async SwitchState(row) {
@@ -346,8 +357,14 @@ export default {
       if (res.meta.status == 200) {
         this.type = "success";
         this.message = "更新用户状态成功！";
-        this.Users();
+      } else {
+        this.type = "error";
+        this.message = "更新用户状态失败！";
       }
+      this.$message({
+        type: this.type,
+        message: this.message,
+      });
     },
     handleSizeChange(val) {
       this.queryinfo.pagesize = val;
