@@ -6,6 +6,9 @@
           <img class="img m-r-20" src="../assets/logo.png" />
           <span class="title">商城后台管理系统</span>
         </div>
+        <div class="right">
+          <el-button type="danger" @click="Quit">退出</el-button>
+        </div>
       </el-header>
       <el-container>
         <el-aside :width="isCollapse ? '64px' : '200px'">
@@ -91,6 +94,14 @@ export default {
     Collapse() {
       this.isCollapse = !this.isCollapse;
     },
+    Quit() {
+      this.$message({
+        type: "success",
+        message: "登出成功！",
+      });
+      window.sessionStorage.token = "";
+      this.$router.push({ path: "/" });
+    },
   },
 };
 </script>
@@ -100,6 +111,8 @@ export default {
   color: #333;
   text-align: center;
   line-height: 60px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .el-aside {
