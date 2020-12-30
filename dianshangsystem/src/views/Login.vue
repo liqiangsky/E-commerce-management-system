@@ -43,7 +43,6 @@ export default {
   methods: {
     async Login() {
       const res = await this.$http.post("login", this.loginForm);
-      console.log(res);
       if (res.meta.status == 200) {
         sessionStorage.token = res.data.token;
         this.$router.push({ path: "home" });
