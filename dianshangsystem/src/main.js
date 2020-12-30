@@ -14,10 +14,12 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 
+
 Vue.prototype.$http = axios;
 Vue.use(VueQuillEditor)
 Vue.use(VueAxios, axios);
 Vue.use(ElementUI);
+// Vue.use(cityOptions);
 Vue.config.productionTip = false;
 //全局api基准路径
 axios.defaults.baseURL = 'http://timemeetyou.com:8889/api/private/v1/';
