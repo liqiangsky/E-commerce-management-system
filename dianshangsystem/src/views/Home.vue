@@ -16,7 +16,6 @@
             <i :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
           </div>
           <el-menu
-            class="el-menu-vertical-demo w200"
             background-color="#333744"
             text-color="#fff"
             active-text-color="#409eff"
@@ -120,6 +119,9 @@ export default {
   text-align: center;
   height: calc(100vh - 60px);
 }
+.el-menu {
+  border: none;
+}
 
 .el-main {
   background-color: #e9eef3;
@@ -134,9 +136,7 @@ export default {
     color: #fff;
   }
 }
-.w200 {
-  width: 200px;
-}
+
 .isCollapse {
   color: #fff;
   font-size: 22px;
